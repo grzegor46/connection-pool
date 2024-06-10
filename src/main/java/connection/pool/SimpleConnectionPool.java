@@ -1,5 +1,7 @@
 package connection.pool;
 
+import exception.MaxPoolSizeException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -12,30 +14,41 @@ public class SimpleConnectionPool {
     private String userNameDb;
     private String passwordDb;
     private String dataBaseName;
-    private List<Connection> connectionPool;
+    private List<Connection> connectionPool = new ArrayList<>();;
     private List<Connection> usedConnections = new ArrayList<>();
     final static int MAX_AVAILABLE_NUMBER_CONNECTIONS = 100;
     final static int INITIAL_NUMBER_CONNECTION = 10;
 
-    public SimpleConnectionPool(String urlDb, String dataBaseName, String userNameDb, String passwordDb)  {
+    public SimpleConnectionPool(String urlDb, String dataBaseName, String userNameDb, String passwordDb) throws MaxPoolSizeException {
         String URL = String.format(urlDb, dataBaseName);
-        try {
-            Connection connection = DriverManager.getConnection(URL, userNameDb, passwordDb);
-            for(int i=0; i <= INITIAL_NUMBER_CONNECTION; i++) {
+        for(int i=0; i <= INITIAL_NUMBER_CONNECTION; i++) {
+            Connection connection = createConnection(URL, userNameDb, passwordDb);
             connectionPool.add(connection);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 
-
-    public Connection getConnection() {
+    public Connection getConnectionFromPool() {
         Connection connection = connectionPool.remove(connectionPool.size()-1);
         usedConnections.add(connection);
         return connection;
     }
 
+    public Connection createConnection(String URL, String userNameDb, String passwordDb) throws MaxPoolSizeException {
+        try {
+            if (connectionPool.size() <= MAX_AVAILABLE_NUMBER_CONNECTIONS) {
+                return DriverManager.getConnection(URL, userNameDb, passwordDb);
+
+            }
+        }catch(SQLException e) {
+            throw new MaxPoolSizeException("No available connections in the pool");
+        }
+
+        return null;
+    }
+
+    public List<Connection> getConnectionPool() {
+        return connectionPool;
+    }
 
     public String getUrlDb() {
         return urlDb;
