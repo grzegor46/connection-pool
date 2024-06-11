@@ -1,7 +1,10 @@
 package connection.pool;
 
+import utils.PropertiesUtils;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+
+        SimpleConnectionPool simpleConnectionPool = new SimpleConnectionPool(PropertiesUtils.url, PropertiesUtils.dbName, PropertiesUtils.dbUserName, PropertiesUtils.password);
     }
 }

@@ -20,9 +20,13 @@ public class SimpleConnectionPool {
     final static int INITIAL_NUMBER_CONNECTION = 10;
 
     public SimpleConnectionPool(String urlDb, String dataBaseName, String userNameDb, String passwordDb) throws MaxPoolSizeException {
-        String URL = String.format(urlDb, dataBaseName);
-        for(int i=0; i <= INITIAL_NUMBER_CONNECTION; i++) {
-            Connection connection = createConnection(URL, userNameDb, passwordDb);
+        this.urlDb = urlDb;
+        this.dataBaseName = dataBaseName;
+        this.userNameDb = userNameDb;
+        this.passwordDb = passwordDb;
+
+        for(int i=0; i <= INITIAL_NUMBER_CONNECTION; i++) { // allokowanie 10 polaczen do bazy
+            Connection connection = createConnection();
             connectionPool.add(connection);
         }
     }
@@ -33,17 +37,22 @@ public class SimpleConnectionPool {
         return connection;
     }
 
-    public Connection createConnection(String URL, String userNameDb, String passwordDb) throws MaxPoolSizeException {
+    public Connection createConnection() throws MaxPoolSizeException {
         try {
             if (connectionPool.size() <= MAX_AVAILABLE_NUMBER_CONNECTIONS) {
-                return DriverManager.getConnection(URL, userNameDb, passwordDb);
-
+                String url = String.format(this.urlDb, this.dataBaseName);
+                return DriverManager.getConnection(url, this.userNameDb, this.passwordDb);
             }
         }catch(SQLException e) {
-            throw new MaxPoolSizeException("No available connections in the pool");
+            throw new MaxPoolSizeException("No available connections in the pool- max 100 reached"); // limit polaczen, rzuci wyjatek ze nie mozna wiecej niz 100
         }
 
         return null;
+    }
+
+    public void releaseConnection() {
+        Connection connection = usedConnections.remove(usedConnections.size()-1);
+        connectionPool.add(connection);
     }
 
     public List<Connection> getConnectionPool() {
