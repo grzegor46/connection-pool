@@ -19,7 +19,7 @@ public class SimpleConnectionPool {
     final static int MAX_AVAILABLE_NUMBER_CONNECTIONS = 100;
     final static int INITIAL_NUMBER_CONNECTION = 10;
 
-    public SimpleConnectionPool(String urlDb, String dataBaseName, String userNameDb, String passwordDb) throws MaxPoolSizeException {
+    public SimpleConnectionPool(String urlDb, String dataBaseName, String userNameDb, String passwordDb) {
         this.urlDb = urlDb;
         this.dataBaseName = dataBaseName;
         this.userNameDb = userNameDb;
@@ -37,7 +37,7 @@ public class SimpleConnectionPool {
         return connection;
     }
 
-    public Connection createConnection() throws MaxPoolSizeException {
+    public Connection createConnection() {
         try {
             if (connectionPool.size() <= MAX_AVAILABLE_NUMBER_CONNECTIONS) {
                 String url = String.format(this.urlDb, this.dataBaseName);
